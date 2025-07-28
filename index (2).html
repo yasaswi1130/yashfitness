@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YASHFITNESS</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <!-- Montserrat for the main title font, and Bajaj Sans for the primary body font -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Bajaj+Sans&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for unique font and overall aesthetics */
+        body {
+            /* Changed font to Bajaj Sans with generic fallbacks */
+            font-family: 'Bajaj Sans', sans-serif;
+            background-color: #f0f4f8; /* Light background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for better scrolling */
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #app-container {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* Rounded corners for the main container */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: calc(100vh - 40px); /* Adjust height for padding */
+            position: relative; /* Needed for absolute positioning of profile icon */
+        }
+        .title-font {
+            /* Montserrat for a unique, bold look for the main title */
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.05em;
+            font-weight: 800; /* Make it extra bold */
+        }
+        .section-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-radius: 1.5rem; /* Rounded corners for sections */
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            padding: 1.5rem;
+            min-height: 150px; /* Ensure boxes have a minimum height */
+            font-size: 1.25rem; /* Default font size for section text, adjusted for better fit */
+        }
+        .section-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        .section-grid {
+            display: grid;
+            gap: 1.5rem;
+            width: 100%;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid */
+        }
+        /* Specific colors for each section */
+        .bg-fitness-goals { background-color: #4CAF50; } /* Green */
+        .bg-fitness-quiz { background-color: #2196F3; } /* Blue */
+        .bg-budget-meals { background-color: #FFC107; } /* Amber */
+        .bg-motivational-quotes { background-color: #9C27B0; } /* Purple */
+        .bg-daily-tracker { background-color: #FF5722; } /* Deep Orange */
+        .bg-exercises { background-color: #795548; } /* Brown */
+
+        /* Specific colors for fitness goal boxes */
+        .goal-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-radius: 1rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            padding: 1rem;
+            min-height: 100px;
+            font-size: 1.1rem;
+            background-color: #607D8B; /* Default grey-blue for goals */
+        }
+        .goal-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+        .goal-box.selected {
+            border: 3px solid #4CAF50; /* Green border for selected goal */
+            box-shadow: 0 0 0 5px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Quiz option styling for correct/wrong answers */
+        .quiz-option.correct-answer {
+            outline: 3px solid #4CAF50; /* Green outline for correct answer */
+            background-color: #e6ffe6; /* Light green background */
+        }
+        .quiz-option.wrong-selected {
+            outline: 3px solid #FF5722; /* Red outline for wrong selected */
+            background-color: #ffebe6; /* Light red background */
+        }
+
+        /* Balloon popup styling */
+        .balloon-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(76, 175, 80, 0.9); /* Greenish background */
+            color: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 2.5rem; /* Larger font for impact */
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            opacity: 0;
+            animation: fadeAndScale 1.5s forwards;
+            pointer-events: none; /* Allows clicks to pass through */
+        }
+
+        @keyframes fadeAndScale {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            20% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            80% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+        }
+
+        /* Custom modal for quiz feedback (kept for consistency, though popups are primary) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            animation-name: animatetop;
+            animation-duration: 0.4s
+        }
+        @keyframes animatetop {
+            from {top: -300px; opacity: 0}
+            to {top: 0; opacity: 1}
+        }
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Profile icon styling */
+        #profile-icon {
+            position: absolute;
+            top: 1.5rem; /* Adjusted for padding */
+            right: 1.5rem; /* Adjusted for padding */
+            font-size: 2.5rem; /* Larger emoji size */
+            cursor: pointer;
+            z-index: 50; /* Ensure it's above other content */
+            transition: transform 0.2s ease-in-out;
+        }
+        #profile-icon:hover {
+            transform: scale(1.1);
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 768px) {
+            #app-container {
+                padding: 1.5rem;
+            }
+            .section-box {
+                min-height: 120px;
+                font-size: 1rem;
+            }
+            .section-grid {
+                grid-template-columns: 1fr; /* Stack sections on small screens */
+            }
+            .balloon-popup {
+                font-size: 1.8rem; /* Adjust font size for smaller screens */
+                padding: 15px 30px;
+            }
+            #profile-icon {
+                font-size: 2rem; /* Adjust emoji size for smaller screens */
+                top: 1rem;
+                right: 1rem;
+            }
+        }
+
+        /* Responsive iframe container for YouTube videos */
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 0.5rem; /* Rounded corners for video */
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <!-- Profile Icon at top right -->
+        <div id="profile-icon" onclick="showMyProfile()">
+            👤
+        </div>
+
+        <!-- Header for the application -->
+        <h1 class="text-5xl md:text-6xl font-bold mb-8 text-gray-800 title-font text-center">
+            Welcome to YASHFITNESS
+        </h1>
+
+        <!-- Main content area where sections will be displayed -->
+        <div id="content-area" class="w-full flex flex-col items-center">
+            <!-- Home page sections will be loaded here by default -->
+        </div>
+
+        <!-- Return to Home Button (initially hidden) -->
+        <button id="return-home-btn" class="hidden mt-8 px-6 py-3 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 transition-colors duration-300" onclick="showHomePage()">
+            Return to Home Page
+        </button>
+    </div>
+
+    <!-- Quiz Feedback Modal (kept but will be less used for correct answers) -->
+    <div id="quizModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <p id="modalMessage" class="text-xl font-semibold text-gray-800"></p>
+        </div>
+    </div>
+
+    <script>
+        const contentArea = document.getElementById('content-area');
+        const returnHomeBtn = document.getElementById('return-home-btn');
+        const quizModal = document.getElementById('quizModal');
+        const modalMessage = document.getElementById('modalMessage');
+        let selectedFitnessGoal = ''; // To store the selected goal
+        let quizScore = 0; // Global variable for quiz score
+
+        // Global object to store daily tracker states
+        const dailyTrackerStatus = {
+            'water-intake': false,
+            'carb-intake': false,
+            'fat-intake': false,
+            'fiber-intake': false,
+            'protein-intake': false,
+            'calorie-intake': false,
+            'workout-day': false,
+            'step-count': false,
+            'cardio': false
+        };
+
+        // --- Helper Functions ---
+
+        /**
+         * Displays a custom modal message.
+         * @param {string} message - The message to display.
+         * @param {string} type - 'correct' or 'wrong' for styling.
+         */
+        function showModal(message, type) {
+            modalMessage.textContent = message;
+            if (type === 'correct') {
+                // For correct answers, we'll use the balloon popup primarily
+                // This modal will still be available for other uses if needed
+                modalMessage.style.color = '#4CAF50'; // Green for correct
+            } else if (type === 'wrong') {
+                modalMessage.style.color = '#FF5722'; // Orange for wrong
+                quizModal.style.display = 'flex'; // Only show modal for wrong answers now
+            } else {
+                modalMessage.style.color = '#333'; // Default
+                quizModal.style.display = 'flex';
+            }
+        }
+
+        /** Closes the custom modal. */
+        function closeModal() {
+            quizModal.style.display = 'none';
+        }
+
+        /**
+         * Displays a "balloon" style popup for correct answers.
+         * @param {string} message - The message to display.
+         */
+        function showBalloonPopup(message) {
+            const popup = document.createElement('div');
+            popup.classList.add('balloon-popup');
+            popup.textContent = message;
+            document.body.appendChild(popup);
+
+            // Remove the popup after the animation completes
+            popup.addEventListener('animationend', () => {
+                popup.remove();
+            });
+        }
+
+        /** Shows the return to home button. */
+        function showReturnHomeButton() {
+            returnHomeBtn.classList.remove('hidden');
+        }
+
+        /** Hides the return to home button. */
+        function hideReturnHomeButton() {
+            returnHomeBtn.classList.add('hidden');
+        }
+
+        // --- Section Content Functions ---
+
+        /** Renders the home page with all section boxes. */
+        function showHomePage() {
+            hideReturnHomeButton();
+            contentArea.innerHTML = `
+                <div class="section-grid">
+                    <div class="section-box bg-fitness-goals" onclick="showFitnessGoals()">
+                        Fitness Goals
+                    </div>
+                    <div class="section-box bg-fitness-quiz" onclick="showFitnessQuiz()">
+                        Fitness Quiz
+                    </div>
+                    <div class="section-box bg-budget-meals" onclick="showBudgetMeals()">
+                        Budget Meals
+                    </div>
+                    <div class="section-box bg-motivational-quotes" onclick="showMotivationalQuotes()">
+                        Motivational Quotes
+                    </div>
+                    <div class="section-box bg-daily-tracker" onclick="showDailyTracker()">
+                        Daily Tracker
+                    </div>
+                    <div class="section-box bg-exercises" onclick="showExercises()">
+                        Exercises
+                    </div>
+                </div>
+            `;
+        }
+
+        /** Renders the Fitness Goals section. */
+        function showFitnessGoals() {
+            showReturnHomeButton();
+            contentArea.innerHTML = `
+                <div class="w-full max-w-2xl bg-white p-8 rounded-2xl shadow-md">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-800 text-center">Your Fitness Journey Starts Here!</h2>
+
+                    <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="goal-box bg-green-600" data-goal="fatloss-musclebuilding" onclick="selectFitnessGoal(this, 'fatloss-musclebuilding')">
+                            Fat Loss & Muscle Building
+                        </div>
+                        <div class="goal-box bg-blue-600" data-goal="weightgain" onclick="selectFitnessGoal(this, 'weightgain')">
+                            Weight Gain
+                        </div>
+                        <div class="goal-box bg-yellow-600" data-goal="bodyrecomposition" onclick="selectFitnessGoal(this, 'bodyrecomposition')">
+                            Body Recomposition
+                        </div>
+                        <div class="goal-box bg-purple-600" data-goal="generalfitness" onclick="selectFitnessGoal(this, 'generalfitness')">
+                            General Fitness
+                        </div>
+                    </div>
+
+                    <div id="goal-details-form" class="hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-800 text-center">Tell Us More About Yourself</h3>
+                        <form id="user-details-form" class="space-y-4">
+                            <div>
+                                <label for="height" class="block text-gray-700 text-sm font-medium mb-1">Height (cm):</label>
+                                <input type="number" id="height" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 175" required>
+                            </div>
+                            <div>
+                                <label for="weight" class="block text-gray-700 text-sm font-medium mb-1">Weight (kg):</label>
+                                <input type="number" id="weight" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 70" required>
+                            </div>
+                            <div>
+                                <label for="measurements" class="block text-gray-700 text-sm font-medium mb-1">Body Measurements (e.g., waist: 80cm, chest: 100cm):</label>
+                                <textarea id="measurements" rows="3" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Provide a few key measurements"></textarea>
+                            </div>
+                            <div>
+                                <label for="health-issues" class="block text-gray-700 text-sm font-medium mb-1">Any health issues? (e.g., Diabetes, high blood pressure, joint pain):</label>
+                                <textarea id="health-issues" rows="2" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Describe any relevant health conditions"></textarea>
+                            </div>
+                            <div>
+                                <label for="past-surgeries" class="block text-gray-700 text-sm font-medium mb-1">Any past surgeries or operations? (e.g., ACL surgery, appendectomy):</label>
+                                <textarea id="past-surgeries" rows="2" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Mention any past surgeries"></textarea>
+                            </div>
+                            <div>
+                                <label for="user-photo" class="block text-gray-700 text-sm font-medium mb-1">Upload Your Photo (Optional, for AI analysis):</label>
+                                <input type="file" id="user-photo" accept="image/*" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <p class="text-xs text-gray-500 mt-1">AI analysis feature is under development. This photo upload is optional and for future body condition analysis.</p>
+                            </div>
+                            <button type="submit" class="w-full bg-green-600 text-white p-3 rounded-md font-semibold hover:bg-green-700 transition-colors duration-300">Submit Details</button>
+                        </form>
+                        <div id="submission-message" class="mt-4 text-center text-green-700 font-semibold hidden">
+                            Thank you for your details! We'll use this to tailor your fitness plan.
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const goalDetailsForm = document.getElementById('goal-details-form');
+            const userDetailsForm = document.getElementById('user-details-form');
+            const submissionMessage = document.getElementById('submission-message');
+
+            userDetailsForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                // In a real app, you would send this data to a backend or process it.
+                const height = document.getElementById('height').value;
+                const weight = document.getElementById('weight').value;
+                const measurements = document.getElementById('measurements').value;
+                const healthIssues = document.getElementById('health-issues').value;
+                const pastSurgeries = document.getElementById('past-surgeries').value;
+                const userPhoto = document.getElementById('user-photo').files[0];
+
+                console.log({
+                    goal: selectedFitnessGoal, // Use the globally stored selected goal
+                    height,
+                    weight,
+                    measurements,
+                    healthIssues,
+                    pastSurgeries,
+                    userPhoto: userPhoto ? userPhoto.name : 'No photo uploaded'
+                });
+
+                submissionMessage.classList.remove('hidden');
+                userDetailsForm.reset(); // Clear the form
+                goalDetailsForm.classList.add('hidden'); // Hide the form after submission
+                // No need to reset goal selection as it's now handled by box clicks
+            });
+        }
+
+        /**
+         * Handles the selection of a fitness goal box.
+         * @param {HTMLElement} selectedBox - The goal box element that was clicked.
+         * @param {string} goalValue - The value of the selected goal.
+         */
+        function selectFitnessGoal(selectedBox, goalValue) {
+            // Remove 'selected' class from all goal boxes
+            document.querySelectorAll('.goal-box').forEach(box => {
+                box.classList.remove('selected');
+            });
+
+            // Add 'selected' class to the clicked box
+            selectedBox.classList.add('selected');
+            selectedFitnessGoal = goalValue; // Store the selected goal globally
+
+            // Show the details form
+            document.getElementById('goal-details-form').classList.remove('hidden');
+            document.getElementById('submission-message').classList.add('hidden'); // Hide message if goal changes
+        }
+
+
+        // Quiz questions
+        const quizQuestions = [
+            {
+                question: "Which exercise primarily targets the chest muscles?",
+                options: ["Squat", "Deadlift", "Bench Press", "Overhead Press"],
+                answer: "Bench Press"
+            },
+            {
+                question: "What is the recommended daily water intake for adults (approximate)?",
+                options: ["1-2 liters", "3-4 liters", "5-6 liters", "7-8 liters"],
+                answer: "3-4 liters"
+            },
+            {
+                question: "Which nutrient is the primary source of energy for the body?",
+                options: ["Protein", "Fats", "Carbohydrates", "Vitamins"],
+                answer: "Carbohydrates"
+            },
+            {
+                question: "What does 'HIIT' stand for in fitness?",
+                options: ["High Intensity Interval Training", "Heavy Impact Isolation Technique", "Health Improvement Integration Test", "High Intensity Isometric Training"],
+                answer: "High Intensity Interval Training"
+            },
+            {
+                question: "Which of these is a compound exercise?",
+                options: ["Bicep Curl", "Leg Extension", "Shoulder Press", "Tricep Pushdown"],
+                answer: "Shoulder Press"
+            }
+        ];
+        let currentQuizQuestionIndex = 0;
+        // quizScore is already global
+
+        /** Renders the Fitness Quiz section. */
+        function showFitnessQuiz() {
+            showReturnHomeButton();
+            quizScore = 0; // Reset score for new quiz session
+            currentQuizQuestionIndex = 0;
+            displayQuizQuestion();
+        }
+
+        /** Displays a single quiz question. */
+        function displayQuizQuestion() {
+            if (currentQuizQuestionIndex >= quizQuestions.length) {
+                contentArea.innerHTML = `
+                    <div class="w-full max-w-xl bg-white p-8 rounded-2xl shadow-md text-center">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-800">Quiz Completed!</h2>
+                        <p class="text-xl text-gray-700 mb-4">Your final score: <span class="font-bold text-indigo-600">${quizScore} / ${quizQuestions.length}</span></p>
+                        <button class="px-6 py-3 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 transition-colors duration-300" onclick="showFitnessQuiz()">Play Again</button>
+                    </div>
+                `;
+                return;
+            }
+
+            const questionData = quizQuestions[currentQuizQuestionIndex];
+            let optionsHtml = questionData.options.map((option, index) => `
+                <button class="quiz-option w-full p-3 mb-3 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors duration-200 text-lg"
+                        data-answer="${option}" onclick="checkQuizAnswer(this, '${questionData.answer}')">
+                    ${option}
+                </button>
+            `).join('');
+
+            contentArea.innerHTML = `
+                <div class="w-full max-w-xl bg-white p-8 rounded-2xl shadow-md">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">Fitness Quiz</h2>
+                    <p class="text-xl mb-6 text-gray-700">${currentQuizQuestionIndex + 1}. ${questionData.question}</p>
+                    <div id="quiz-options" class="space-y-3">
+                        ${optionsHtml}
+                    </div>
+                    <div id="quiz-feedback" class="mt-4 text-center text-lg font-semibold hidden"></div>
+                </div>
+            `;
+        }
+
+        /**
+         * Checks the selected quiz answer.
+         * @param {HTMLElement} selectedButton - The button element that was clicked.
+         * @param {string} correctAnswer - The correct answer for the current question.
+         */
+        function checkQuizAnswer(selectedButton, correctAnswer) {
+            const selectedAnswer = selectedButton.dataset.answer;
+            const quizOptionsDiv = document.getElementById('quiz-options');
+            const allOptionButtons = quizOptionsDiv.querySelectorAll('.quiz-option');
+
+            // Disable all buttons after an answer is selected
+            allOptionButtons.forEach(btn => btn.disabled = true);
+
+            if (selectedAnswer === correctAnswer) {
+                quizScore++;
+                // Show balloon popup for correct answer
+                showBalloonPopup("Correct! 🎉");
+                selectedButton.classList.add('correct-answer'); // Add green outline
+            } else {
+                // Apply red outline to wrong selected answer
+                selectedButton.classList.add('wrong-selected');
+
+                // Apply green outline to the correct answer
+                allOptionButtons.forEach(btn => {
+                    if (btn.dataset.answer === correctAnswer) {
+                        btn.classList.add('correct-answer');
+                    }
+                });
+            }
+
+            // Move to next question after a short delay
+            setTimeout(() => {
+                closeModal(); // Close any lingering modal if it was accidentally opened
+                currentQuizQuestionIndex++;
+                displayQuizQuestion();
+            }, 2000); // 2 seconds delay
+        }
+
+        /** Renders the Budget Meals section. */
+        function showBudgetMeals() {
+            showReturnHomeButton();
+            contentArea.innerHTML = `
+                <div class="w-full max-w-2xl bg-white p-8 rounded-2xl shadow-md">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-800 text-center">Budget-Friendly Meal Plans</h2>
+                    <div class="mb-6">
+                        <label for="budget-range" class="block text-gray-700 text-lg font-medium mb-2">Select Your Daily Budget (Rupees):</label>
+                        <select id="budget-range" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700">
+                            <option value="">-- Select Budget --</option>
+                            <option value="100">₹100 per day</option>
+                            <option value="150">₹150 per day</option>
+                            <option value="200">₹200 per day</option>
+                            <option value="250">₹250 per day</option>
+                            <option value="300">₹300+ per day</option>
+                        </select>
+                    </div>
+                    <div id="meal-plan-display" class="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200 hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-800">Your Meal Plan:</h3>
+                        <div id="meal-plan-content" class="text-gray-700 leading-relaxed">
+                            <!-- Meal plan details will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const budgetRangeSelect = document.getElementById('budget-range');
+            const mealPlanDisplay = document.getElementById('meal-plan-display');
+            const mealPlanContent = document.getElementById('meal-plan-content');
+
+            budgetRangeSelect.addEventListener('change', (event) => {
+                const budget = parseInt(event.target.value);
+                let planHtml = '';
+
+                if (isNaN(budget)) {
+                    mealPlanDisplay.classList.add('hidden');
+                    return;
+                }
+
+                mealPlanDisplay.classList.remove('hidden');
+
+                switch (budget) {
+                    case 100:
+                        planHtml = `
+                            <p class="font-medium text-lg mb-2">Budget: ₹100/day</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Breakfast:</strong> 2 boiled eggs + 1 banana</li>
+                                <li><strong>Lunch:</strong> Dal (lentil soup) + Rice + Small portion of seasonal vegetable</li>
+                                <li><strong>Dinner:</strong> Roti (flatbread) + Vegetable curry</li>
+                                <li><strong>Snack:</strong> Handful of roasted chana (chickpeas)</li>
+                            </ul>
+                            <p class="mt-4 text-sm text-gray-600">Focus on staple grains, lentils, and seasonal vegetables for affordability.</p>
+                        `;
+                        break;
+                    case 150:
+                        planHtml = `
+                            <p class="font-medium text-lg mb-2">Budget: ₹150/day</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Breakfast:</strong> Oats porridge with milk + a few nuts</li>
+                                <li><strong>Lunch:</strong> Chicken/Paneer (cottage cheese) curry + Rice + Salad</li>
+                                <li><strong>Dinner:</strong> 2 Whole wheat rotis + Mixed vegetable sabzi</li>
+                                <li><strong>Snacks:</strong> Fruit (apple/orange) + Buttermilk</li>
+                            </ul>
+                            <p class="mt-4 text-sm text-gray-600">Adds more protein options and fruits.</p>
+                        `;
+                        break;
+                    case 200:
+                        planHtml = `
+                            <p class="font-medium text-lg mb-2">Budget: ₹200/day</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Breakfast:</strong> Vegetable poha/upma + Curd</li>
+                                <li><strong>Lunch:</strong> Fish/Egg curry + Brown rice + Green salad</li>
+                                <li><strong>Dinner:</strong> Lentil soup + Quinoa/Millet + Steamed vegetables</li>
+                                <li><strong>Snacks:</strong> Protein bar (homemade) / Sprout salad</li>
+                            </ul>
+                            <p class="mt-4 text-sm text-gray-600">More variety in protein and healthy grains.</p>
+                        `;
+                        break;
+                    case 250:
+                        planHtml = `
+                            <p class="font-medium text-lg mb-2">Budget: ₹250/day</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Breakfast:</strong> Smoothie (spinach, banana, protein powder) + Toast with peanut butter</li>
+                                <li><strong>Lunch:</strong> Grilled chicken/tofu with roasted vegetables + Sweet potato</li>
+                                <li><strong>Dinner:</strong> Whole wheat pasta with lean ground meat/vegetables + Side salad</li>
+                                <li><strong>Snacks:</strong> Greek yogurt + Berries</li>
+                            </ul>
+                            <p class="mt-4 text-sm text-gray-600">Includes more diverse ingredients and protein sources.</p>
+                        `;
+                        break;
+                    case 300:
+                        planHtml = `
+                            <p class="font-medium text-lg mb-2">Budget: ₹300+/day</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Breakfast:</strong> Scrambled eggs with avocado and whole-grain toast</li>
+                                <li><strong>Lunch:</strong> Salmon/Tuna salad with mixed greens and olive oil dressing</li>
+                                <li><strong>Dinner:</strong> Lean steak/legumes with quinoa and a large portion of colorful vegetables</li>
+                                <li><strong>Snacks:</b> Nuts, seeds, and a piece of fruit</li>
+                            </ul>
+                            <p class="mt-4 text-sm text-gray-600">Premium protein sources and healthy fats for a balanced diet.</p>
+                        `;
+                        break;
+                    default:
+                        planHtml = `<p class="text-red-500">Please select a valid budget range.</p>`;
+                }
+                mealPlanContent.innerHTML = planHtml;
+            });
+        }
+
+        // Motivational quotes
+        const motivationalQuotes = [
+            "The only bad workout is the one that didn't happen. Get up and move!",
+            "Your body can stand almost anything. It's your mind that you have to convince.",
+            "Believe you can and you're halfway there. Push your limits!",
+            "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+            "The pain you feel today will be the strength you feel tomorrow.",
+            "Don't wish for it, work for it. Every drop of sweat counts.",
+            "Strive for progress, not perfection. Consistency is key.",
+            "The only way to do great work is to love what you do. Love your fitness journey!",
+            "Today's actions are tomorrow's results. Make them count.",
+            "Your health is an investment, not an expense. Invest in yourself."
+        ];
+
+        /** Renders the Motivational Quotes section. */
+        function showMotivationalQuotes() {
+            showReturnHomeButton();
+            const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
+            const quote = motivationalQuotes[randomIndex];
+
+            contentArea.innerHTML = `
+                <div class="w-full max-w-2xl bg-white p-8 rounded-2xl shadow-md text-center">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-800">Daily Dose of Motivation</h2>
+                    <div class="p-6 bg-purple-50 border border-purple-200 rounded-lg shadow-inner">
+                        <p class="text-2xl italic text-gray-700 leading-relaxed">"${quote}"</p>
+                        <p class="mt-4 text-lg font-semibold text-purple-600">- YASHFITNESS</p>
+                    </div>
+                    <button class="mt-8 px-6 py-3 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 transition-colors duration-300" onclick="showMotivationalQuotes()">
+                        Get Another Quote
+                    </button>
+                </div>
+            `;
+        }
+
+        /** Renders the Daily Tracker section. */
+        function showDailyTracker() {
+            showReturnHomeButton();
+            let trackerItemsHtml = '';
+            for (const key in dailyTrackerStatus) {
+                const label = key.replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                trackerItemsHtml += `
+                    <div class="flex items-center">
+                        <input type="checkbox" id="${key}" class="h-5 w-5 text-blue-600 rounded focus:ring-blue-500" ${dailyTrackerStatus[key] ? 'checked' : ''} onchange="updateDailyTrackerStatus('${key}', this.checked)">
+                        <label for="${key}" class="ml-3 text-lg text-gray-700">${label} ${key.includes('intake') ? '(Tracked)' : (key === 'water-intake' ? '(2-3 Liters)' : (key === 'step-count' ? '(e.g., 10,000 steps)' : ''))}</label>
+                    </div>
+                `;
+            }
+
+            contentArea.innerHTML = `
+                <div class="w-full max-w-2xl bg-white p-8 rounded-2xl shadow-md">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-800 text-center">Your Daily Fitness Tracker</h2>
+                    <div class="space-y-4">
+                        ${trackerItemsHtml}
+                    </div>
+                    <p class="mt-6 text-center text-gray-600 text-sm">Check off tasks as you complete them throughout your day!</p>
+                </div>
+            `;
+        }
+
+        /**
+         * Updates the global dailyTrackerStatus object when a checkbox is toggled.
+         * @param {string} key - The key of the tracker item.
+         * @param {boolean} isChecked - The new checked state.
+         */
+        function updateDailyTrackerStatus(key, isChecked) {
+            dailyTrackerStatus[key] = isChecked;
+            console.log('Daily Tracker Status:', dailyTrackerStatus);
+        }
+
+        /** Renders the Exercises section. */
+        function showExercises() {
+            showReturnHomeButton();
+            contentArea.innerHTML = `
+                <div class="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-md">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-800 text-center">Exercise Library & Splits</h2>
+                    <div class="flex flex-wrap justify-center gap-4 mb-8">
+                        <button class="px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-300" onclick="displayExerciseSplit('bro-split')">Bro Split</button>
+                        <button class="px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-300" onclick="displayExerciseSplit('ppl-split')">Push Pull Leg (PPL) Split</button>
+                        <button class="px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-300" onclick="displayExerciseSplit('upper-lower-split')">Upper / Lower Split</button>
+                        <button class="px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-300" onclick="displayExerciseSplit('full-body-split')">Full Body Split</button>
+                    </div>
+                    <div id="exercise-details" class="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200 hidden">
+                        <!-- Exercise details and images/videos will be loaded here -->
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * Displays details for a selected exercise split.
+         * In a real application, images/videos would be extracted from a database or API.
+         * Here, we use placeholder images and a YouTube video for reference.
+         * @param {string} splitType - The type of exercise split to display.
+         */
+        function displayExerciseSplit(splitType) {
+            const exerciseDetailsDiv = document.getElementById('exercise-details');
+            exerciseDetailsDiv.classList.remove('hidden');
+            let detailsHtml = '';
+
+            const exercisesData = {
+                'bro-split': {
+                    title: 'Bro Split (Example)',
+                    description: 'Typically focuses on one or two muscle groups per day, allowing for high volume per muscle group.',
+                    days: [
+                        { day: 'Day 1: Chest', exercises: [
+                            { name: 'Barbell Bench Press', videoUrl: 'https://www.youtube.com/embed/rT7DgCr-3pg' },
+                            { name: 'Incline Dumbbell Press', videoUrl: 'https://www.youtube.com/embed/hChjZQhX1Ls' },
+                            { name: 'Cable Flyes', videoUrl: 'https://www.youtube.com/embed/JUDTGZh4rhg' }
+                        ]},
+                        { day: 'Day 2: Back', exercises: [
+                            { name: 'Pull-ups', videoUrl: 'https://www.youtube.com/embed/MhokcbRLP5w' },
+                            { name: 'Barbell Rows', videoUrl: 'https://www.youtube.com/embed/kBWAon7ItDw' },
+                            { name: 'Lat Pulldown', videoUrl: 'https://www.youtube.com/embed/Z_3xHwuO8Tk' }
+                        ]},
+                        { day: 'Day 3: Shoulders', exercises: [
+                            { name: 'Overhead Press', videoUrl: 'https://www.youtube.com/embed/nNMR9fRGRjQ' },
+                            { name: 'Lateral Raises', videoUrl: 'https://www.youtube.com/embed/Gmi_DCnJ93c' },
+                            { name: 'Face Pulls', videoUrl: 'https://www.youtube.com/embed/IeOqdw9WI90' }
+                        ]},
+                        { day: 'Day 4: Legs', exercises: [
+                            { name: 'Barbell Squats', videoUrl: 'https://www.youtube.com/embed/Ak1iHbEeeY8' },
+                            { name: 'Leg Press', videoUrl: 'https://www.youtube.com/embed/nDh_BlnLCGc' },
+                            { name: 'Romanian Deadlifts', videoUrl: 'https://www.youtube.com/embed/5rIqP63yWFg' }
+                        ]},
+                        { day: 'Day 5: Arms & Abs', exercises: [
+                            { name: 'Bicep Curls', videoUrl: 'https://www.youtube.com/embed/MKWBV29S6c0' },
+                            { name: 'Tricep Extensions', videoUrl: 'https://www.youtube.com/embed/1FjkhpZsaxc' },
+                            { name: 'Plank', videoUrl: 'https://www.youtube.com/embed/xe2MXatLTUw' }
+                        ]}
+                    ]
+                },
+                'ppl-split': {
+                    title: 'Push Pull Leg (PPL) Split (Example)',
+                    description: 'A popular 3-day or 6-day split that groups exercises by movement pattern.',
+                    days: [
+                        { day: 'Day 1: Push (Chest, Shoulders, Triceps)', exercises: [
+                            { name: 'Barbell Bench Press', videoUrl: 'https://www.youtube.com/embed/rT7DgCr-3pg' },
+                            { name: 'Overhead Dumbbell Press', videoUrl: 'https://www.youtube.com/embed/M2rwvNhTOu0' },
+                            { name: 'Tricep Pushdowns', videoUrl: 'https://www.youtube.com/embed/_w-HpW70nSQ' }
+                        ]},
+                        { day: 'Day 2: Pull (Back, Biceps)', exercises: [
+                            { name: 'Deadlifts', videoUrl: 'https://www.youtube.com/embed/XxWcirHIwVo' },
+                            { name: 'Barbell Rows', videoUrl: 'https://www.youtube.com/embed/kBWAon7ItDw' },
+                            { name: 'Hammer Curls', videoUrl: 'https://www.youtube.com/embed/zC3nLlEvin4' }
+                        ]},
+                        { day: 'Day 3: Legs (Quads, Hamstrings, Glutes, Calves)', exercises: [
+                            { name: 'Barbell Squats', videoUrl: 'https://www.youtube.com/embed/Ak1iHbEeeY8' },
+                            { name: 'Leg Press', videoUrl: 'https://www.youtube.com/embed/nDh_BlnLCGc' },
+                            { name: 'Calf Raises', videoUrl: 'https://www.youtube.com/embed/UV8gOrHmuKc' }
+                        ]}
+                    ]
+                },
+                'upper-lower-split': {
+                    title: 'Upper / Lower Split (Example)',
+                    description: 'Alternates between upper body and lower body workouts, often done 4 days a week.',
+                    days: [
+                        { day: 'Day 1: Upper Body', exercises: [
+                            { name: 'Bench Press', videoUrl: 'https://www.youtube.com/embed/rT7DgCr-3pg' },
+                            { name: 'Pull-ups', videoUrl: 'https://www.youtube.com/embed/MhokcbRLP5w' },
+                            { name: 'Overhead Press', videoUrl: 'https://www.youtube.com/embed/nNMR9fRGRjQ' },
+                            { name: 'Dumbbell Rows', videoUrl: 'https://www.youtube.com/embed/djKXLt7kv7Q' }
+                        ]},
+                        { day: 'Day 2: Lower Body', exercises: [
+                            { name: 'Barbell Squats', videoUrl: 'https://www.youtube.com/embed/Ak1iHbEeeY8' },
+                            { name: 'Romanian Deadlifts', videoUrl: 'https://www.youtube.com/embed/5rIqP63yWFg' },
+                            { name: 'Leg Extensions', videoUrl: 'https://www.youtube.com/embed/o90ocSBDJis' },
+                            { name: 'Hamstring Curls', videoUrl: 'https://www.youtube.com/embed/SbSNUXPRkc8' }
+                        ]}
+                    ]
+                },
+                'full-body-split': {
+                    title: 'Full Body Split (Example)',
+                    description: 'Works all major muscle groups in each session, often done 2-3 times a week.',
+                    days: [
+                        { day: 'Full Body Workout A', exercises: [
+                            { name: 'Squats', videoUrl: 'https://www.youtube.com/embed/Ak1iHbEeeY8' },
+                            { name: 'Bench Press', videoUrl: 'https://www.youtube.com/embed/rT7DgCr-3pg' },
+                            { name: 'Barbell Rows', videoUrl: 'https://www.youtube.com/embed/kBWAon7ItDw' },
+                            { name: 'Overhead Press', videoUrl: 'https://www.youtube.com/embed/nNMR9fRGRjQ' }
+                        ]},
+                        { day: 'Full Body Workout B', exercises: [
+                            { name: 'Deadlifts', videoUrl: 'https://www.youtube.com/embed/XxWcirHIwVo' },
+                            { name: 'Incline Dumbbell Press', videoUrl: 'https://www.youtube.com/embed/hChjZQhX1Ls' },
+                            { name: 'Lat Pulldown', videoUrl: 'https://www.youtube.com/embed/Z_3xHwuO8Tk' },
+                            { name: 'Leg Press', videoUrl: 'https://www.youtube.com/embed/nDh_BlnLCGc' }
+                        ]}
+                    ]
+                }
+            };
+
+            const selectedSplit = exercisesData[splitType];
+
+            if (selectedSplit) {
+                detailsHtml += `<h3 class="text-2xl font-semibold mb-4 text-gray-800 text-center">${selectedSplit.title}</h3>`;
+                detailsHtml += `<p class="mb-6 text-gray-700 text-center">${selectedSplit.description}</p>`;
+                selectedSplit.days.forEach(dayInfo => {
+                    detailsHtml += `<h4 class="text-xl font-bold mt-6 mb-4 text-gray-800">${dayInfo.day}</h4>`;
+                    detailsHtml += `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">`;
+                    dayInfo.exercises.forEach(exercise => {
+                        detailsHtml += `
+                            <div class="bg-white p-4 rounded-lg shadow-md flex flex-col items-center">
+                                ${exercise.videoUrl ? `
+                                <div class="video-container w-full mb-3">
+                                    <iframe src="${exercise.videoUrl}" allowfullscreen></iframe>
+                                </div>
+                                ` : `
+                                <img src="${exercise.img}" alt="${exercise.name} exercise form" class="w-full h-40 object-cover rounded-md mb-3">
+                                `}
+                                <p class="font-medium text-lg text-gray-800 text-center">${exercise.name}</p>
+                                <p class="text-sm text-gray-600 text-center">
+                                    <em>(Video/Image for reference. Search online for detailed form and technique to avoid injuries.)</em>
+                                </p>
+                            </div>
+                        `;
+                    });
+                    detailsHtml += `</div>`;
+                });
+            } else {
+                detailsHtml = `<p class="text-red-500 text-center">No details available for this split type.</p>`;
+            }
+            exerciseDetailsDiv.innerHTML = detailsHtml;
+        }
+
+        /** Renders the My Profile section. */
+        function showMyProfile() {
+            showReturnHomeButton();
+            let dailyPerformanceHtml = '';
+            let completedTasksCount = 0;
+            let totalTasks = 0;
+
+            for (const key in dailyTrackerStatus) {
+                if (dailyTrackerStatus.hasOwnProperty(key)) {
+                    totalTasks++;
+                    const label = key.replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                    const status = dailyTrackerStatus[key] ? '✅ Completed' : '❌ Not Completed';
+                    if (dailyTrackerStatus[key]) {
+                        completedTasksCount++;
+                    }
+                    dailyPerformanceHtml += `<li class="flex justify-between items-center py-1 text-lg text-gray-700"><span>${label}:</span> <span class="${dailyTrackerStatus[key] ? 'text-green-600' : 'text-red-600'}">${status}</span></li>`;
+                }
+            }
+
+            contentArea.innerHTML = `
+                <div class="w-full max-w-2xl bg-white p-8 rounded-2xl shadow-md text-center">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-800">My Profile</h2>
+
+                    <div class="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg shadow-inner">
+                        <h3 class="text-2xl font-semibold mb-3 text-gray-800">Quiz Performance</h3>
+                        <p class="text-xl text-gray-700">Your current quiz score: <span class="font-bold text-indigo-600">${quizScore} / ${quizQuestions.length}</span></p>
+                    </div>
+
+                    <div class="mb-8 p-6 bg-green-50 border border-green-200 rounded-lg shadow-inner">
+                        <h3 class="text-2xl font-semibold mb-3 text-gray-800">Daily Performance</h3>
+                        <p class="text-xl text-gray-700 mb-4">Tasks Completed: <span class="font-bold text-green-600">${completedTasksCount} / ${totalTasks}</span></p>
+                        <ul class="list-none p-0 m-0 text-left">
+                            ${dailyPerformanceHtml}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize the home page when the script loads
+        document.addEventListener('DOMContentLoaded', showHomePage);
+    </script>
+</body>
+</html>
