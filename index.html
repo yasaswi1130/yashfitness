@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YASHFITNESS</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <!-- Montserrat for the main title font, and Bajaj Sans for the primary body font -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Bajaj+Sans&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app-container">
+        <!-- Profile Icon at top right -->
+        <div id="profile-icon" onclick="showMyProfile()">
+            👤
+        </div>
+
+        <!-- Header for the application -->
+        <h1 class="text-5xl md:text-6xl font-bold mb-8 text-gray-800 title-font text-center">
+            Welcome to YASHFITNESS
+        </h1>
+
+        <!-- Main content area where sections will be displayed -->
+        <div id="content-area" class="w-full flex flex-col items-center">
+            <!-- Home page sections will be loaded here by default -->
+        </div>
+
+        <!-- Return to Home Button (initially hidden) -->
+        <button id="return-home-btn" class="hidden mt-8 px-6 py-3 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 transition-colors duration-300" onclick="showHomePage()">
+            Return to Home Page
+        </button>
+    </div>
+
+    <!-- Quiz Feedback Modal (kept but will be less used for correct answers) -->
+    <div id="quizModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <p id="modalMessage" class="text-xl font-semibold text-gray-800"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
